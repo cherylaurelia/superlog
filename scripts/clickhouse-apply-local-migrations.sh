@@ -24,10 +24,13 @@ if [[ "${1:-}" == "--render" ]]; then
 fi
 
 CLICKHOUSE_DB="${CLICKHOUSE_DB:-superlog}"
-: "${SUPERLOG_COMPOSE_PROJECT:?SUPERLOG_COMPOSE_PROJECT is required}"
+compose=(docker compose)
+if [[ -n "${SUPERLOG_COMPOSE_PROJECT:-}" ]]; then
+  compose+=(-p "$SUPERLOG_COMPOSE_PROJECT")
+fi
 
 clickhouse_client() {
-  docker compose -p "$SUPERLOG_COMPOSE_PROJECT" exec -T clickhouse \
+  "${compose[@]}" exec -T clickhouse \
     clickhouse-client --database "$CLICKHOUSE_DB" "$@"
 }
 

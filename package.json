@@ -10,6 +10,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "clickhouse:migrate": "scripts/clickhouse-apply-local-migrations.sh",
     "dev:portless": "scripts/portless-stack.sh start",
     "dev:portless:env": "scripts/portless-stack.sh env",
     "dev:portless:status": "scripts/portless-stack.sh status",

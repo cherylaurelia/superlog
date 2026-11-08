@@ -84,6 +84,7 @@ Start the local stack:
 ```bash
 docker compose up -d
 pnpm --filter @superlog/db db:migrate
+pnpm clickhouse:migrate
 pnpm dev
 ```
 

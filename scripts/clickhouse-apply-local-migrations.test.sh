@@ -14,6 +14,7 @@ cat > "$TMP_DIR/bin/docker" <<'EOF'
 set -euo pipefail
 
 args="$*"
+printf '%s\n' "$args" >> "${DOCKER_ARGS_LOG:-/dev/null}"
 if [[ "$args" == *"--query"* ]]; then
   payload="$(cat)"
   if [[ -n "$payload" ]]; then
@@ -42,3 +43,34 @@ if [[ -s "$QUERY_STDIN_LOG" ]]; then
 fi
 
 echo "clickhouse migration query stdin: ok"
+
+DOCKER_ARGS_LOG="$TMP_DIR/docker-args.log"
+
+# dev:portless passes a project per worktree.
+PATH="$TMP_DIR/bin:$PATH" \
+  QUERY_STDIN_LOG="$QUERY_STDIN_LOG" \
+  DOCKER_ARGS_LOG="$DOCKER_ARGS_LOG" \
+  SUPERLOG_COMPOSE_PROJECT="named-project" \
+  "$REPO_ROOT/scripts/clickhouse-apply-local-migrations.sh" </dev/null >/dev/null
+
+if ! grep -q '^compose -p named-project exec -T clickhouse' "$DOCKER_ARGS_LOG"; then
+  echo "expected SUPERLOG_COMPOSE_PROJECT to select the compose project" >&2
+  exit 1
+fi
+
+echo "clickhouse migration named compose project: ok"
+
+# README quick start: no project variable, so docker compose picks its default.
+: > "$DOCKER_ARGS_LOG"
+env -u SUPERLOG_COMPOSE_PROJECT \
+  PATH="$TMP_DIR/bin:$PATH" \
+  QUERY_STDIN_LOG="$QUERY_STDIN_LOG" \
+  DOCKER_ARGS_LOG="$DOCKER_ARGS_LOG" \
+  "$REPO_ROOT/scripts/clickhouse-apply-local-migrations.sh" </dev/null >/dev/null
+
+if grep -q -- ' -p ' "$DOCKER_ARGS_LOG" || ! grep -q '^compose exec -T clickhouse' "$DOCKER_ARGS_LOG"; then
+  echo "expected no compose project flag when SUPERLOG_COMPOSE_PROJECT is unset" >&2
+  exit 1
+fi
+
+echo "clickhouse migration default compose project: ok"

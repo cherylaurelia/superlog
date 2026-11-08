@@ -35,6 +35,7 @@ cd superlog
 pnpm install
 docker compose up -d
 pnpm --filter @superlog/db db:migrate
+pnpm clickhouse:migrate
 pnpm dev
 ```
 
@@ -89,6 +90,7 @@ docs/           Integration & setup guides (github-app-setup.md, webhooks.md)
 | `pnpm format`                                 | Biome format --write                                      |
 | `pnpm --filter @superlog/<pkg> <script>`      | Run a script in one package                               |
 | `pnpm --filter @superlog/db db:migrate`       | Apply Postgres migrations                                |
+| `pnpm clickhouse:migrate`                      | Apply ClickHouse migrations                              |
 | `pnpm demo:bootstrap:acme`                    | Create a demo Acme Inc. org + project                     |
 | `pnpm demo:seed:acme`                         | Seed Acme Inc. telemetry (good first-time demo)           |
 | `pnpm demo:seed:rich`                         | Seed richer demo data with multiple signals               |
